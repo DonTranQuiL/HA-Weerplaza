@@ -115,6 +115,8 @@ cards:
           border-left: 5px solid #ff9800;
         }
 ```
+<img width="363" height="679" alt="{F1C45BE3-054E-43FA-8425-D72B2C05F887}" src="https://github.com/user-attachments/assets/173ea33e-023c-4344-8ba5-5a15f0fe6788" />
+
 
 [hacs]: https://hacs.xyz
 [hacs_badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
