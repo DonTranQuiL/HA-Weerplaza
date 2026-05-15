@@ -2,7 +2,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.const import Platform
-from .const import DOMAIN, 
+from .const import DOMAIN
 from .coordinator import WeerplazaCoordinator
 from .cache import PersistentCache
 
