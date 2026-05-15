@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import aiohttp
 import asyncio
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .const import DOMAIN, BASE_URL, DEBUG_FILE_NAME
+from .const import BASE_URL, DEBUG_FILE_NAME
 from .parser import WeerplazaParser
 
 _LOGGER = logging.getLogger(__name__)
