@@ -1,14 +1,18 @@
 {
   "domain": "weerplaza",
   "name": "Weerplaza Weather",
-  "config_flow": true,
-  "documentation": "https://github.com/Malosaaa/ha-weerplaza",
-  "issue_tracker": "https://github.com/Malosaaa/ha-weerplaza/issues",
-  "codeowners": ["@Malosaaa"],
-  "requirements": ["beautifulsoup4==4.12.3"],
-  "iot_class": "web_scraping",
-  "version": "1.0.1",
-  "dependencies": [],
   "after_dependencies": [],
-  "integration_type": "service"
+  "codeowners": [
+    "@Malosaaa"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/Malosaaa/ha-weerplaza",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Malosaaa/ha-weerplaza/issues",
+  "requirements": [
+    "beautifulsoup4==4.12.3"
+  ],
+  "version": "1.0.1"
 }
