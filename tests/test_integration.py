@@ -6,7 +6,6 @@ from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza import async_setup_entry
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 
-# Minimal HTML for mocking
 MOCK_HTML = """
 <html>
   <body>
@@ -16,12 +15,10 @@ MOCK_HTML = """
 </html>
 """
 
-
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
     """Test Weerplaza integration using mocked HTTP responses."""
 
-    # Fake config entry
     class FakeEntry:
         entry_id = "test123"
         domain = DOMAIN
@@ -35,30 +32,29 @@ async def test_weerplaza_integration(hass: HomeAssistant):
 
     entry = FakeEntry()
 
-    # Mock aiohttp ClientSession.get
-    def fake_get(*args, **kwargs):
-        class FakeResponse:
-            status = 200
+    # Correct fake response for async context manager
+    class FakeResponse:
+        status = 200
+        async def text(self):
+            return MOCK_HTML
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, exc_type, exc_val, exc_tb):
+            return False
 
-            async def text(self):
-                return MOCK_HTML
+    class FakeSession:
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, exc_type, exc_val, exc_tb):
+            return False
+        def get(self, *args, **kwargs):
+            # Return an object usable in `async with`
+            return FakeResponse()
 
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, exc_type, exc_val, exc_tb):
-                return False
-
-        return FakeResponse()
-
-    with patch("aiohttp.ClientSession") as mock_session:
-        mock_session.return_value.__aenter__.return_value.get = fake_get
-
-        # Setup entry
+    # Patch ClientSession to return our fake session
+    with patch("aiohttp.ClientSession", return_value=FakeSession()):
         result = await async_setup_entry(hass, entry)
 
     assert result is True
-
-    # Check coordinator data is set
     coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
     assert coordinator.data is not None
