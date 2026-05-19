@@ -1,8 +1,8 @@
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 from unittest.mock import AsyncMock, patch, MagicMock, mock_open
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import UpdateFailed
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 
