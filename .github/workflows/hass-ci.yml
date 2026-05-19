@@ -82,7 +82,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest -v tests/test_integration.py
+          pytest -v tests/test_integration.py -p no:socket
 
       # -------------------------
       # Final logs
