@@ -3,7 +3,7 @@ from unittest.mock import patch
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ha_weerplaza.const import DOMAIN, CONF_INSTANCE_NAME, CONF_LOCATION_PATH, CONF_SCAN_INTERVAL
+from custom_components.weerplaza.const import DOMAIN, CONF_INSTANCE_NAME, CONF_LOCATION_PATH, CONF_SCAN_INTERVAL
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
@@ -20,7 +20,7 @@ async def test_config_flow_user_success(hass):
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
-    with patch("custom_components.ha_weerplaza.async_setup_entry", return_value=True):
+    with patch("custom_components.weerplaza.async_setup_entry", return_value=True):
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
