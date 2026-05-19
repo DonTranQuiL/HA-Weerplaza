@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 from homeassistant.const import EntityCategory
-from custom_components.ha_weerplaza.sensor import WeerplazaMasterSensor, WeerplazaDiagnosticSensor
+from custom_components.weerplaza.sensor import WeerplazaMasterSensor, WeerplazaDiagnosticSensor
 
 @pytest.fixture
 def mock_coordinator():
