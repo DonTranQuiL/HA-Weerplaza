@@ -51,4 +51,6 @@ async def test_weerplaza_integration_loads(hass: HomeAssistant):
     # --- Assertions ---
     assert result is True, "async_setup_entry should return True"
     assert DOMAIN in hass.data, "Weerplaza domain should exist in hass.data"
-    assert entry.entry_id in hass.data[DOMAIN], "Coordinator should be stored by entry_id"
+    assert entry.entry_id in hass.data[DOMAIN], (
+        "Coordinator should be stored by entry_id"
+    )
