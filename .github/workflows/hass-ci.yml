@@ -25,18 +25,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio pytest-homeassistant-custom-component
 
-      - name: Start Home Assistant
-        run: |
-          docker run -d \
-            --name homeassistant \
-            -p 8123:8123 \
-            ghcr.io/home-assistant/home-assistant:stable
-
-      - name: Wait for Home Assistant
-        run: |
-          echo "Waiting for Home Assistant..."
-          sleep 30
-
       - name: Run tests
         run: |
           pytest -v tests/test_integration.py
