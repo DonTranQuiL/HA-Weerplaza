@@ -22,8 +22,9 @@ async def test_weerplaza_integration_loads(hass: HomeAssistant):
         title = "Weerplaza Test"
         data = {
             "name": "Weerplaza Test",
-            "location_path": "netherlands/utrecht",  # <-- FIX
+            "location_path": "netherlands/utrecht",  # <-- required for scraping
         }
+        options = {}  # <-- fix: scan_interval or other options can be added here
         state = ConfigEntryState.LOADED
 
         async def add_update_listener(self, *args, **kwargs):
