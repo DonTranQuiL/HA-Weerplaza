@@ -25,25 +25,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest requests pytest-homeassistant-custom-component pytest-socket
 
-      - name: Start Home Assistant container
+      - name: Start Home Assistant
         run: |
           docker run -d \
             --name homeassistant \
             -p 8123:8123 \
             ghcr.io/home-assistant/home-assistant:stable
 
-      - name: Wait for Home Assistant
+      - name: Wait for startup
         run: |
           echo "Waiting for Home Assistant..."
           sleep 30
 
-      - name: 🔥 HARD disable socket blocking (critical fix)
-        run: |
-          pip uninstall -y pytest-socket || true
-
-      - name: Run tests
+      - name: Run tests (FIXED SOCKET HANDLING)
         run: |
           pytest -v tests/test_integration.py
         env:
           PYTEST_DISABLE_SOCKET: "1"
-          PYTEST_ADDOPTS: "-p no:socket -p no:pytest_socket"
+          PYTEST_ADDOPTS: "-p no:socket"
