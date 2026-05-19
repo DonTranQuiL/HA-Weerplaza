@@ -1,9 +1,64 @@
-# Weerplaza Weather Integration for Home Assistant
+<div align="center">
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
-[![Version](https://img.shields.io/github/v/release/DonTranQuiL/ha-weerplaza?color=blue)](https://github.com/DonTranQuiL/HA-Weerplaza/releases)
-[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/DonTranQuiL/ha-weerplaza/commits/main)
-[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.5+-blue.svg)](https://www.home-assistant.io/)
+# 🌌 WEERPLAZA Integration for Home Assistant.
+**This integration is more advanced than the original within Home Assistant, this one includes as well lightning/thunder detection.**
+</div>
+<p align="center">
+  <!-- Release / License -->
+  <a href="https://github.com/DonTranQuiL/HA-Weerplaza/releases">
+    <img src="https://img.shields.io/github/v/release/DonTranQuiL/HA-Weerplaza?style=for-the-badge&color=007ec6" alt="Latest Release">
+  </a>
+  <a href="https://github.com/DonTranQuiL/HA-Weerplaza/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/DonTranQuiL/HA-Weerplaza?style=for-the-badge&color=007ec6" alt="License">
+  </a>
+
+  <!-- CI / Quality -->
+  <a href="https://github.com/DonTranQuiL/HA-Weerplaza/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/DonTranQuiL/HA-Weerplaza/codechecker.yml?style=for-the-badge&label=CODE%20CHECKS&color=5dbb0f" alt="Code Checks">
+  </a>
+  <a href="https://github.com/DonTranQuiL/HA-Weerplaza/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/DonTranQuiL/HA-Weerplaza/pytest.yml?style=for-the-badge&label=TESTS&color=5dbb0f" alt="Tests">
+  </a>
+  <a href="https://github.com/DonTranQuiL/HA-Weerplaza/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/DonTranQuiL/HA-Weerplaza/hacs.yaml?style=for-the-badge&label=HACS%20VALIDATION&color=5dbb0f" alt="HACS Validation">
+  </a>
+
+  <!-- Code Quality -->
+  <a href="https://github.com/pre-commit/pre-commit">
+    <img src="https://img.shields.io/badge/pre--commit-enabled-5dbb0f?style=for-the-badge" alt="pre-commit">
+  </a>
+  <a href="https://github.com/astral-sh/ruff">
+    <img src="https://img.shields.io/badge/code%20style-ruff-000000?style=for-the-badge" alt="Ruff">
+  </a>
+  <a href="https://codecov.io/gh/DonTranQuiL/HA-Weerplaza">
+  <img 
+    src="https://codecov.io/gh/DonTranQuiL/HA-Weerplaza/branch/main/graph/badge.svg"
+    alt="Coverage"
+    style="height:28px;"
+  >
+</a>
+
+  <!-- Ecosystem -->
+  <a href="https://hacs.xyz/">
+    <img src="https://img.shields.io/badge/HACS-CUSTOM-ff6e27?style=for-the-badge" alt="HACS">
+  </a>
+  <a href="https://www.home-assistant.io/">
+    <img src="https://img.shields.io/badge/Home%20Assistant-2024.5%2B-007ec6?style=for-the-badge" alt="Home Assistant">
+  </a>
+
+  <!-- Social / Support -->
+  <a href="https://github.com/DonTranQuiL">
+    <img src="https://img.shields.io/badge/maintainer-%40DonTranQuiL-007ec6?style=for-the-badge" alt="Maintainer">
+  </a>
+  <a href="https://ko-fi.com/DonTranQuiL">
+    <img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-ffdd00?style=for-the-badge" alt="Donate">
+  </a>
+  <a href="https://community.home-assistant.io/">
+    <img src="https://img.shields.io/badge/community-forum-007ec6?style=for-the-badge" alt="Community">
+  </a>
+</p>
+
+</div>
 
 This custom component for Home Assistant allows you to monitor weather data for any location from the Dutch weather site [Weerplaza.nl](https://www.weerplaza.nl/). It works by scraping the data directly from the location's page, providing detailed weather information without requiring an official API.
 
