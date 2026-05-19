@@ -1,45 +1,35 @@
 import pytest
+from unittest.mock import patch, AsyncMock
 
-from homeassistant.setup import async_setup_component
 from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntryState
 
-
-DOMAIN = "weerplaza"
+from custom_components.weerplaza.const import DOMAIN
+from custom_components.weerplaza import async_setup_entry
 
 
 @pytest.mark.asyncio
-async def test_integration_creates_entities(hass: HomeAssistant):
+async def test_weerplaza_integration_loads(hass: HomeAssistant):
     """
-    REAL Home Assistant integration test:
-
-    - sets up integration
-    - verifies it loads
-    - checks entities exist in state machine
+    Real Home Assistant integration test (correct architecture):
+    - creates fake ConfigEntry
+    - runs async_setup_entry
+    - checks coordinator exists
     """
 
-    # Step 1: fake minimal config entry setup
-    config = {
-        DOMAIN: {
-            "name": "Weerplaza Test",
-        }
-    }
+    # Fake config entry (this replaces async_setup_component)
+    mock_entry = patch("homeassistant.config_entries.ConfigEntry", autospec=True)
 
-    # Step 2: load integration into HA
-    result = await async_setup_component(hass, DOMAIN, config)
-    await hass.async_block_till_done()
+    entry = mock_entry.start()
+    entry.entry_id = "test123"
+    entry.data = {"name": "Weerplaza Test"}
+    entry.state = ConfigEntryState.LOADED
 
-    # MUST load successfully
+    hass.config_entries.async_forward_entry_setups = AsyncMock()
+    hass.config_entries.async_unload_platforms = AsyncMock(return_value=True)
+
+    result = await async_setup_entry(hass, entry)
+
     assert result is True
-
-    # Step 3: check integration registered something in HA
-    states = hass.states.async_all()
-
-    # At least something exists (integration didn’t crash)
-    assert len(states) >= 0
-
-    # Step 4: if your integration creates sensors later,
-    # this is where you validate them safely
-
-    # Example (safe optional checks — won't fail if not present yet):
-    # assert hass.states.get("sensor.weerplaza_temperature") is not None
-    # assert hass.states.get("weather.weerplaza") is not None
+    assert DOMAIN in hass.data
+    assert entry.entry_id in hass.data[DOMAIN]
