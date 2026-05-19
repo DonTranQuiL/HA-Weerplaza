@@ -1,0 +1,101 @@
+name: Home Assistant Final Boss CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ha-version: ["2025.6.0", "2026.1.0"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup config
+        run: |
+          mkdir -p config/custom_components/weerplaza
+
+      - name: Copy integration
+        run: |
+          cp -r custom_components/weerplaza/* config/custom_components/weerplaza/
+
+      # ---------------- FAKE API ----------------
+      - name: Start fake API
+        run: |
+          docker run -d \
+            --name fake-api \
+            -p 5000:5000 \
+            python:3.12 \
+            bash -c "pip install flask && python /app/fake_api.py"
+
+      - name: Copy fake API into container
+        run: |
+          docker cp tests/fake_api.py fake-api:/app/fake_api.py
+
+      # ---------------- HOME ASSISTANT ----------------
+      - name: Start Home Assistant
+        run: |
+          docker run -d \
+            --name homeassistant \
+            -p 8123:8123 \
+            -v ${{ github.workspace }}/config:/config \
+            -e TZ=Europe/Amsterdam \
+            ghcr.io/home-assistant/home-assistant:${{ matrix.ha-version }}
+
+      - name: Wait for HA
+        run: |
+          for i in {1..90}; do
+            if docker logs homeassistant | grep -q "Home Assistant core started"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker logs homeassistant
+          exit 1
+
+      - name: Wait API
+        run: |
+          for i in {1..60}; do
+            if curl -s http://localhost:8123/api/ | grep -q "API running"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      # ---------------- SNAPSHOT TEST ----------------
+      - name: Run snapshot test
+        run: |
+          pip install pytest
+          pytest tests/test_snapshot.py -v
+
+      # ---------------- HEALTH SCORE ----------------
+      - name: PR Health Score
+        run: |
+          SCORE=100
+
+          if docker logs homeassistant | grep -i "error"; then
+            SCORE=$((SCORE - 40))
+          fi
+
+          if ! curl -s http://localhost:8123/api/states | grep -q "weerplaza"; then
+            SCORE=$((SCORE - 40))
+          fi
+
+          echo "PR HEALTH SCORE: $SCORE"
+
+          if [ $SCORE -lt 70 ]; then
+            exit 1
+          fi
+
+      - name: Logs
+        if: always()
+        run: docker logs homeassistant
