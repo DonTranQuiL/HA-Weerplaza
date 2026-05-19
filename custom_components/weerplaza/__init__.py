@@ -1,12 +1,11 @@
 import logging
-import os
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.const import Platform
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, DEBUG_FILE_NAME
+from .const import DOMAIN
 from .coordinator import WeerplazaCoordinator
 from .cache import PersistentCache
 
