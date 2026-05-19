@@ -9,8 +9,11 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 with open("tests/debug_weerplaza.html", "r", encoding="utf-8") as f:
     MOCK_HTML = f.read()
 
+
 @pytest.mark.asyncio
-async def test_weerplaza_integration_real_html(hass: HomeAssistant, enable_custom_integrations):
+async def test_weerplaza_integration_real_html(
+    hass: HomeAssistant, enable_custom_integrations
+):
     """Test Weerplaza integration using real debug HTML."""
 
     entry = MockConfigEntry(
@@ -29,15 +32,20 @@ async def test_weerplaza_integration_real_html(hass: HomeAssistant, enable_custo
     def fake_get(*args, **kwargs):
         class FakeResponse:
             status = 200
+
             async def text(self):
                 return MOCK_HTML
+
             async def __aenter__(self):
                 return self
+
             async def __aexit__(self, exc_type, exc_val, exc_tb):
                 return False
+
         return FakeResponse()
 
     original_init = WeerplazaCoordinator.__init__
+
     def patched_init(self, *args, **kwargs):
         original_init(self, *args, **kwargs)
         self.cache = AsyncMock()
