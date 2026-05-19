@@ -112,7 +112,7 @@ class WeerplazaParser:
                         if wx_div
                         else None
                     )
-                    
+
                     # Safely extract and cast numeric temperature
                     temp_div = hour_div.find("div", class_=re.compile("temp"))
                     temp_val = "-"
@@ -217,7 +217,7 @@ class WeerplazaParser:
             widget = self.soup.find("div", class_=re.compile("location-widget"))
             if widget:
                 wx = widget.find("div", class_=re.compile("wx"))
-                
+
                 # Safely extract and cast numeric temperature
                 temp_span = widget.find("span", class_="temp")
                 temp_val = None
@@ -234,9 +234,13 @@ class WeerplazaParser:
                     if wx
                     else None
                 )
-                
+
                 location_h2 = widget.find("h2")
-                loc_name = location_h2.get_text(strip=True).replace("Het weer nu in ", "") if location_h2 else "Weerplaza"
+                loc_name = (
+                    location_h2.get_text(strip=True).replace("Het weer nu in ", "")
+                    if location_h2
+                    else "Weerplaza"
+                )
 
                 scraped_data["current_weather"] = {
                     "description_icon_title": wx.get("title", "Onbekend")
