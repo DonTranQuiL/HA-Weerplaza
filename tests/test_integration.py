@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntryState
 from custom_components.weerplaza.const import DOMAIN
@@ -15,6 +15,7 @@ MOCK_HTML = """
   </body>
 </html>
 """
+
 
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
@@ -38,12 +39,16 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     async def fake_get(*args, **kwargs):
         class FakeResponse:
             status = 200
+
             async def text(self):
                 return MOCK_HTML
+
             async def __aenter__(self):
                 return self
+
             async def __aexit__(self, exc_type, exc_val, exc_tb):
                 return False
+
         return FakeResponse()
 
     with patch("aiohttp.ClientSession") as mock_session:
