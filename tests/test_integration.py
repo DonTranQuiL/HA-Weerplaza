@@ -1,4 +1,3 @@
-import asyncio
 from homeassistant.core import HomeAssistant
 
 
