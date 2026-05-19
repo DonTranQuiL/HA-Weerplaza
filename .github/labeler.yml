@@ -1,0 +1,14 @@
+bug:
+  - any:
+      - 'custom_components/**'
+      - 'tests/**'
+
+documentation:
+  - any:
+      - 'README.md'
+      - 'docs/**'
+
+ci:
+  - any:
+      - '.github/workflows/**'
+      - '.github/**'
