@@ -1,4 +1,5 @@
 import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 from unittest.mock import AsyncMock, patch, MagicMock, mock_open
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
