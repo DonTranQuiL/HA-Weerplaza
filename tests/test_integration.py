@@ -16,12 +16,14 @@ MOCK_HTML = """
 </html>
 """
 
+
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
     """Test Weerplaza integration using mocked HTTP responses."""
 
     class FakeEntry:
         """Simulate user config entry."""
+
         entry_id = "test123"
         domain = DOMAIN
         title = "Weerplaza Test"
@@ -41,12 +43,16 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     def fake_get(*args, **kwargs):
         class FakeResponse:
             status = 200
+
             async def text(self):
                 return MOCK_HTML
+
             async def __aenter__(self):
                 return self
+
             async def __aexit__(self, exc_type, exc_val, exc_tb):
                 return False
+
         return FakeResponse()
 
     # Wrap __init__ to intercept the instance right after it's created
@@ -57,9 +63,10 @@ async def test_weerplaza_integration(hass: HomeAssistant):
         self.cache = AsyncMock()  # Safely injects the mock onto the instance
 
     # Patch both the session network calls and the coordinator initialization
-    with patch("aiohttp.ClientSession") as mock_session, \
-         patch.object(WeerplazaCoordinator, "__init__", patched_init):
-        
+    with (
+        patch("aiohttp.ClientSession") as mock_session,
+        patch.object(WeerplazaCoordinator, "__init__", patched_init),
+    ):
         mock_session.return_value.__aenter__.return_value.get = fake_get
 
         # Setup entry
