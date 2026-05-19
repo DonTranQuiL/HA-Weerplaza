@@ -1,4 +1,4 @@
-name: Home Assistant Integration Test (Real Runtime)
+name: Home Assistant Integration Test (Full Runtime + Entity Validation)
 
 on:
   push:
@@ -12,13 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -----------------------------
+      # Checkout
+      # -----------------------------
       - name: Checkout code
         uses: actions/checkout@v6
 
       # -----------------------------
-      # Prepare Home Assistant config
+      # Prepare config directory
       # -----------------------------
-      - name: Create HA config directory
+      - name: Create Home Assistant config
         run: |
           mkdir -p config/custom_components/weerplaza
 
@@ -33,6 +36,7 @@ jobs:
         run: |
           docker run -d \
             --name homeassistant \
+            -p 8123:8123 \
             -v ${{ github.workspace }}/config:/config \
             -e TZ=Europe/Amsterdam \
             ghcr.io/home-assistant/home-assistant:stable
@@ -42,11 +46,11 @@ jobs:
       # -----------------------------
       - name: Wait for Home Assistant startup
         run: |
-          echo "Waiting for Home Assistant to start..."
+          echo "Waiting for Home Assistant startup..."
 
-          for i in {1..60}; do
+          for i in {1..80}; do
             if docker logs homeassistant 2>&1 | grep -q "Home Assistant core started"; then
-              echo "Home Assistant started successfully"
+              echo "Home Assistant started"
               exit 0
             fi
             sleep 5
@@ -57,26 +61,75 @@ jobs:
           exit 1
 
       # -----------------------------
-      # Check integration loaded
+      # Wait for API readiness
       # -----------------------------
-      - name: Verify integration loaded
+      - name: Wait for API
+        run: |
+          echo "Waiting for HA API..."
+
+          for i in {1..60}; do
+            STATUS=$(curl -s http://localhost:8123/api/ || true)
+            if echo "$STATUS" | grep -q "API running"; then
+              echo "API is ready"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "API did not become ready"
+          docker logs homeassistant
+          exit 1
+
+      # -----------------------------
+      # Check logs for integration errors
+      # -----------------------------
+      - name: Check integration logs
         run: |
           docker logs homeassistant > logs.txt
 
-          echo "Searching for integration errors..."
+          echo "Checking for integration errors..."
 
-          # Fail if your integration caused errors
           if grep -i "weerplaza" logs.txt | grep -i "error"; then
-            echo "❌ Integration error detected"
+            echo "❌ Integration error found"
             grep -i "weerplaza" logs.txt
             exit 1
           fi
 
-          echo "✅ No integration errors found"
+          echo "✅ No integration errors detected"
 
       # -----------------------------
-      # Show logs for debugging
+      # Verify entity exists (REAL TEST)
       # -----------------------------
-      - name: Print Home Assistant logs
+      - name: Verify entity exists
+        run: |
+          echo "Checking entity state..."
+
+          # CHANGE THIS to your real entity
+          ENTITY_ID="sensor.weerplaza_temperature"
+
+          RESPONSE=$(curl -s \
+            http://localhost:8123/api/states/$ENTITY_ID)
+
+          echo "$RESPONSE"
+
+          if echo "$RESPONSE" | grep -q '"entity_id"'; then
+            echo "✅ Entity exists: $ENTITY_ID"
+          else
+            echo "❌ Entity missing: $ENTITY_ID"
+            exit 1
+          fi
+
+      # -----------------------------
+      # Optional: dump all states for debugging
+      # -----------------------------
+      - name: Dump all states
+        if: always()
+        run: |
+          curl -s http://localhost:8123/api/states | head -c 5000
+
+      # -----------------------------
+      # Always show logs
+      # -----------------------------
+      - name: Show Home Assistant logs
         if: always()
         run: docker logs homeassistant
