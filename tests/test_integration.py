@@ -16,12 +16,14 @@ MOCK_HTML = """
 </html>
 """
 
+
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
     """Test Weerplaza integration using mocked HTTP responses."""
 
     class FakeEntry:
         """Simulate user config entry."""
+
         entry_id = "test123"
         domain = DOMAIN
         title = "Weerplaza Test"
@@ -41,12 +43,16 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     async def fake_get(*args, **kwargs):
         class FakeResponse:
             status = 200
+
             async def text(self):
                 return MOCK_HTML
+
             async def __aenter__(self):
                 return self
+
             async def __aexit__(self, exc_type, exc_val, exc_tb):
                 return False
+
         return FakeResponse()
 
     # Patch ClientSession to use fake_get
