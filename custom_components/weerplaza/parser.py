@@ -112,16 +112,22 @@ class WeerplazaParser:
                         if wx_div
                         else None
                     )
+                    
+                    # Safely extract and cast numeric temperature
                     temp_div = hour_div.find("div", class_=re.compile("temp"))
-                    temp_str = (
-                        temp_div.get_text(strip=True).replace("\u00b0C", "")
-                        if temp_div
-                        else None
-                    )
+                    temp_val = "-"
+                    if temp_div:
+                        raw_temp = temp_div.get_text(strip=True)
+                        cleaned_temp = re.sub(r"[^\d.-]", "", raw_temp)
+                        try:
+                            temp_val = float(cleaned_temp)
+                        except ValueError:
+                            pass
+
                     scraped_data["hourly_forecast"].append(
                         {
                             "time": time_val,
-                            "temperature": float(temp_str) if temp_str else "-",
+                            "temperature": temp_val,
                             "icon": icon_match.group(1) if icon_match else "",
                         }
                     )
@@ -174,24 +180,15 @@ class WeerplazaParser:
                         )
 
                     # 4c. Get Temperatures (Red = Max, Blue = Min)
-                    # We replace the degree symbol safely using Unicode \u00b0
                     red_temp = cell.find("div", class_="red temp")
                     if red_temp:
-                        day_map[day_id]["temp_high"] = (
-                            red_temp.get_text(strip=True)
-                            .replace("\u00b0C", "")
-                            .replace("\u00b0", "")
-                            .strip()
-                        )
+                        raw_red = red_temp.get_text(strip=True)
+                        day_map[day_id]["temp_high"] = re.sub(r"[^\d.-]", "", raw_red)
 
                     blue_temp = cell.find("div", class_="blue temp")
                     if blue_temp:
-                        day_map[day_id]["temp_low"] = (
-                            blue_temp.get_text(strip=True)
-                            .replace("\u00b0C", "")
-                            .replace("\u00b0", "")
-                            .strip()
-                        )
+                        raw_blue = blue_temp.get_text(strip=True)
+                        day_map[day_id]["temp_low"] = re.sub(r"[^\d.-]", "", raw_blue)
 
                 # Convert map back to list in original order
                 seen_ids = []
@@ -220,32 +217,38 @@ class WeerplazaParser:
             widget = self.soup.find("div", class_=re.compile("location-widget"))
             if widget:
                 wx = widget.find("div", class_=re.compile("wx"))
+                
+                # Safely extract and cast numeric temperature
                 temp_span = widget.find("span", class_="temp")
-                temp_val = (
-                    float(temp_span.get_text(strip=True).replace("\u00b0", ""))
-                    if temp_span
-                    else None
-                )
+                temp_val = None
+                if temp_span:
+                    raw_temp = temp_span.get_text(strip=True)
+                    cleaned_temp = re.sub(r"[^\d.-]", "", raw_temp)
+                    try:
+                        temp_val = float(cleaned_temp)
+                    except ValueError:
+                        pass
+
                 icon_m = (
                     re.search(r"url\(['\"]?(.*?)['\"]?\)", wx.get("style", ""))
                     if wx
                     else None
                 )
+                
+                location_h2 = widget.find("h2")
+                loc_name = location_h2.get_text(strip=True).replace("Het weer nu in ", "") if location_h2 else "Weerplaza"
+
                 scraped_data["current_weather"] = {
                     "description_icon_title": wx.get("title", "Onbekend")
                     if wx
                     else "Onbekend",
                     "temperature": temp_val,
-                    "location_name_observed": widget.find("h2")
-                    .get_text(strip=True)
-                    .replace("Het weer nu in ", "")
-                    if widget.find("h2")
-                    else "Weerplaza",
+                    "location_name_observed": loc_name,
                     "icon": icon_m.group(1) if icon_m else "",
                 }
                 scraped_data["current_temperature"] = temp_val
-        except Exception:
-            pass
+        except Exception as e:
+            _LOGGER.debug(f"Current weather parsing error: {e}")
 
         # 6. DAYPART FORECAST
         h = scraped_data["hourly_forecast"]
@@ -253,23 +256,23 @@ class WeerplazaParser:
             scraped_data["daypart_forecast"] = [
                 {
                     "time_of_day": "Ochtend",
-                    "temperature": h[0]["temperature"],
-                    "icon": h[0]["icon"],
+                    "temperature": h[0].get("temperature", "-"),
+                    "icon": h[0].get("icon", ""),
                 },
                 {
                     "time_of_day": "Middag",
-                    "temperature": h[4]["temperature"],
-                    "icon": h[4]["icon"],
+                    "temperature": h[4].get("temperature", "-"),
+                    "icon": h[4].get("icon", ""),
                 },
                 {
                     "time_of_day": "Avond",
-                    "temperature": h[8]["temperature"],
-                    "icon": h[8]["icon"],
+                    "temperature": h[8].get("temperature", "-"),
+                    "icon": h[8].get("icon", ""),
                 },
                 {
                     "time_of_day": "Nacht",
-                    "temperature": h[12]["temperature"],
-                    "icon": h[12]["icon"],
+                    "temperature": h[12].get("temperature", "-"),
+                    "icon": h[12].get("icon", ""),
                 },
             ]
 
