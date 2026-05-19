@@ -2,7 +2,9 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock, mock_open
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
+
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 
@@ -47,12 +49,12 @@ async def test_coordinator_successful_scrape(mock_session_cls, hass: HomeAssista
     mock_session.get.return_value.__aenter__.return_value = mock_resp
     mock_session_cls.return_value.__aenter__.return_value = mock_session
 
-    ("builtins.open", mock_open()), patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
+    with patch("builtins.open", mock_open()), patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
         result = await coord._async_update_data()
 
     assert result["current_temperature"] == 18.0
     assert result["current_weather"]["description_icon_title"] == "Onbewolkt"
-    mock_cache.save_assert_called_once
+    mock_cache.save.assert_called_once()
 
 
 @pytest.mark.asyncio
