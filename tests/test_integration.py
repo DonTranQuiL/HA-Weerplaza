@@ -6,6 +6,7 @@ from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses from a real HTML file."""
@@ -25,7 +26,7 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
         options={"scan_interval": 1800},
         entry_id="test123",
     )
-    
+
     # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
@@ -66,7 +67,7 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     # Check coordinator data is set
     coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
     assert coordinator.data is not None
-    
+
     # Verify the parser successfully handled the real data structures
     assert "current_temperature" in coordinator.data
     assert "laatste_scrape_tijd" in coordinator.data
