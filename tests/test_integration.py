@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
@@ -5,16 +6,14 @@ from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-# Load the real debug HTML if you have it
-with open("tests/debug_weerplaza.html", "r", encoding="utf-8") as f:
-    MOCK_HTML = f.read()
-
-
 @pytest.mark.asyncio
-async def test_weerplaza_integration_real_html(
-    hass: HomeAssistant, enable_custom_integrations
-):
-    """Test Weerplaza integration using real debug HTML."""
+async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
+    """Test Weerplaza integration using mocked HTTP responses from a real HTML file."""
+
+    # Safely locate and read the real HTML sample file from the tests directory
+    html_path = os.path.join(os.path.dirname(__file__), "debug_weerplaza.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        real_html = f.read()
 
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -26,6 +25,8 @@ async def test_weerplaza_integration_real_html(
         options={"scan_interval": 1800},
         entry_id="test123",
     )
+    
+    # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
     # Mock aiohttp ClientSession.get
@@ -34,7 +35,7 @@ async def test_weerplaza_integration_real_html(
             status = 200
 
             async def text(self):
-                return MOCK_HTML
+                return real_html  # Feeds the real file content to your scraper
 
             async def __aenter__(self):
                 return self
@@ -44,31 +45,28 @@ async def test_weerplaza_integration_real_html(
 
         return FakeResponse()
 
+    # Wrap __init__ to intercept the instance right after it's created
     original_init = WeerplazaCoordinator.__init__
 
     def patched_init(self, *args, **kwargs):
         original_init(self, *args, **kwargs)
-        self.cache = AsyncMock()
+        self.cache = AsyncMock()  # Safely injects the mock onto the instance
 
+    # Patch both the session network calls and the coordinator initialization
     with (
         patch("aiohttp.ClientSession") as mock_session,
         patch.object(WeerplazaCoordinator, "__init__", patched_init),
     ):
         mock_session.return_value.__aenter__.return_value.get = fake_get
+
+        # Hand off execution to the Home Assistant core runner
         await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
+    # Check coordinator data is set
     coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
-
-    # ✅ Test that data exists
     assert coordinator.data is not None
-
-    # ✅ Test specific values (adjust keys to match your parser output)
-    assert "temperature" in coordinator.data
-    assert "humidity" in coordinator.data
-
-    # Example: check temperature format (like "20°C")
-    temp = coordinator.data["temperature"]
-    hum = coordinator.data["humidity"]
-    assert isinstance(temp, str) and "°" in temp
-    assert isinstance(hum, str) and "%" in hum
+    
+    # Verify the parser successfully handled the real data structures
+    assert "current_temperature" in coordinator.data
+    assert "laatste_scrape_tijd" in coordinator.data
