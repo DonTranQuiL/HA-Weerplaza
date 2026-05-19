@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest requests pytest-homeassistant-custom-component pytest-socket
+          pip install pytest pytest-asyncio pytest-homeassistant-custom-component
 
       - name: Start Home Assistant
         run: |
@@ -32,14 +32,11 @@ jobs:
             -p 8123:8123 \
             ghcr.io/home-assistant/home-assistant:stable
 
-      - name: Wait for startup
+      - name: Wait for Home Assistant
         run: |
           echo "Waiting for Home Assistant..."
           sleep 30
 
-      - name: Run tests (FIXED SOCKET HANDLING)
+      - name: Run tests
         run: |
           pytest -v tests/test_integration.py
-        env:
-          PYTEST_DISABLE_SOCKET: "1"
-          PYTEST_ADDOPTS: "-p no:socket"
