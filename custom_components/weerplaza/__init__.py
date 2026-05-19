@@ -1,13 +1,19 @@
 import logging
 import os
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.const import Platform
+from homeassistant.helpers import config_validation as cv
+
 from .const import DOMAIN, DEBUG_FILE_NAME
 from .coordinator import WeerplazaCoordinator
 from .cache import PersistentCache
 
 _LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
 PLATFORMS = [Platform.SENSOR]
 
 async def async_setup(hass: HomeAssistant, config: dict):
