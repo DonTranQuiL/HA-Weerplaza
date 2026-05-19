@@ -1,0 +1,89 @@
+name: Home Assistant CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # -------------------------
+      # Prepare config
+      # -------------------------
+      - name: Setup config
+        run: |
+          mkdir -p config/custom_components/weerplaza
+
+      - name: Copy integration
+        run: |
+          cp -r custom_components/weerplaza/* config/custom_components/weerplaza/
+
+      # -------------------------
+      # Start fake API
+      # -------------------------
+      - name: Start fake API
+        run: |
+          docker run -d \
+            --name fake-api \
+            -p 5000:5000 \
+            -v ${{ github.workspace }}/tests:/app \
+            python:3.12 \
+            bash -c "pip install flask && python /app/fake_api.py"
+
+      - name: Debug containers (API)
+        run: docker ps -a
+
+      # -------------------------
+      # Start Home Assistant
+      # -------------------------
+      - name: Start Home Assistant
+        run: |
+          docker run -d \
+            --name homeassistant \
+            -p 8123:8123 \
+            -v ${{ github.workspace }}/config:/config \
+            -e TZ=Europe/Amsterdam \
+            ghcr.io/home-assistant/home-assistant:stable
+
+      - name: Debug containers (HA)
+        run: docker ps -a
+
+      # -------------------------
+      # WAIT FOR HA (FIXED — NO LOGS)
+      # -------------------------
+      - name: Wait for Home Assistant
+        run: |
+          echo "Waiting for Home Assistant..."
+
+          for i in {1..90}; do
+            if curl -s http://localhost:8123/ > /dev/null; then
+              echo "HA is up"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "HA failed to start"
+          docker logs homeassistant
+          exit 1
+
+      # -------------------------
+      # Run tests
+      # -------------------------
+      - name: Run integration tests
+        run: |
+          pip install pytest requests
+          pytest -v tests/test_integration.py
+
+      # -------------------------
+      # Final logs
+      # -------------------------
+      - name: Logs
+        if: always()
+        run: docker logs homeassistant
