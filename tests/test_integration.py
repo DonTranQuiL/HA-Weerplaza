@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntryState
 from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza import async_setup_entry
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 # Minimal HTML for mocking
 MOCK_HTML = """
@@ -16,28 +16,24 @@ MOCK_HTML = """
 </html>
 """
 
-
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses."""
 
-    class FakeEntry:
-        """Simulate user config entry."""
-
-        entry_id = "test123"
-        domain = DOMAIN
-        title = "Weerplaza Test"
-        data = {
+    # Use the official MockConfigEntry instead of a custom FakeEntry
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Weerplaza Test",
+        data={
             "name": "Weerplaza Test",
             "location_path": "nederland/utrecht/19344/",
-        }
-        options = {"scan_interval": 1800}
-        state = ConfigEntryState.LOADED
-
-        async def add_update_listener(self, *args, **kwargs):
-            return lambda: None
-
-    entry = FakeEntry()
+        },
+        options={"scan_interval": 1800},
+        entry_id="test123",
+    )
+    
+    # Register the mock entry with the Home Assistant instance
+    entry.add_to_hass(hass)
 
     # Mock aiohttp ClientSession.get (Must be a regular def, not async def!)
     def fake_get(*args, **kwargs):
