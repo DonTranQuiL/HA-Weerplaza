@@ -4,7 +4,7 @@ from homeassistant.config_entries import ConfigEntryState
 from custom_components.weerplaza import async_setup_entry, DOMAIN
 from homeassistant.exceptions import ConfigEntryNotReady
 import aiohttp
-import asyncio
+
 
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
@@ -13,6 +13,7 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     - Tries real scrape if network is available
     - Falls back to mocked scrape for CI
     """
+
     class FakeEntry:
         entry_id = "test123"
         domain = DOMAIN
@@ -38,7 +39,9 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     # Check if the site is reachable
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.weerplaza.nl/{entry.data['location_path']}") as resp:
+            async with session.get(
+                f"https://www.weerplaza.nl/{entry.data['location_path']}"
+            ) as resp:
                 if resp.status != 200:
                     raise RuntimeError("Site returned non-200")
     except Exception:
