@@ -1,4 +1,3 @@
-import asyncio
 import requests
 
 HA = "http://localhost:8123"
@@ -29,16 +28,14 @@ def test_weeerplaza_real_integration():
 
     # Step 2: wait a bit for integration setup
     import time
+
     time.sleep(5)
 
     # Step 3: fetch states (this works only if integration created entities)
     states = requests.get(f"{HA}/api/states").json()
 
     # Step 4: look for your integration entities
-    weerplaza_entities = [
-        s for s in states
-        if "weerplaza" in s["entity_id"]
-    ]
+    weerplaza_entities = [s for s in states if "weerplaza" in s["entity_id"]]
 
     # Step 5: HARD ASSERT (this is the real test)
     assert len(weerplaza_entities) > 0, "No Weerplaza entities found!"
