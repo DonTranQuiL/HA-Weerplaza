@@ -4,8 +4,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import UpdateFailed
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ha_weerplaza.const import DOMAIN
-from custom_components.ha_weerplaza.coordinator import WeerplazaCoordinator
+from custom_components.weerplaza.const import DOMAIN
+from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 
 RAW_MOCK_HTML = """
 <html>
@@ -34,7 +34,7 @@ def mock_entry():
 
 
 @pytest.mark.asyncio
-@patch("custom_components.ha_weerplaza.coordinator.aiohttp.ClientSession")
+@patch("custom_components.weerplaza.coordinator.aiohttp.ClientSession")
 async def test_coordinator_successful_scrape(mock_session_cls, hass: HomeAssistant, mock_entry):
     """Test full online retrieval processing loops end to end successfully."""
     mock_cache = AsyncMock()
@@ -48,7 +48,7 @@ async def test_coordinator_successful_scrape(mock_session_cls, hass: HomeAssista
     mock_session.get.return_value.__aenter__.return_value = mock_resp
     mock_session_cls.return_value.__aenter__.return_value = mock_session
 
-    with patch("builtins.open", mock_open()), patch("custom_components.ha_weerplaza.coordinator.asyncio.sleep"):
+    with patch("builtins.open", mock_open()), patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
         result = await coord._async_update_data()
 
     assert result["current_temperature"] == 18.0
@@ -57,7 +57,7 @@ async def test_coordinator_successful_scrape(mock_session_cls, hass: HomeAssista
 
 
 @pytest.mark.asyncio
-@patch("custom_components.ha_weerplaza.coordinator.aiohttp.ClientSession")
+@patch("custom_components.weerplaza.coordinator.aiohttp.ClientSession")
 async def test_coordinator_server_error_fallback(mock_session_cls, hass: HomeAssistant, mock_entry):
     """Verify fallback systems use previous records safely when connection drops occur."""
     coord = WeerplazaCoordinator(hass, mock_entry)
@@ -69,14 +69,14 @@ async def test_coordinator_server_error_fallback(mock_session_cls, hass: HomeAss
     mock_session.get.return_value.__aenter__.return_value = mock_resp
     mock_session_cls.return_value.__aenter__.return_value = mock_session
 
-    with patch("custom_components.ha_weerplaza.coordinator.asyncio.sleep"):
+    with patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
         result = await coord._async_update_data()
         
     assert result == {"current_temperature": 15.5}
 
 
 @pytest.mark.asyncio
-@patch("custom_components.ha_weerplaza.coordinator.aiohttp.ClientSession")
+@patch("custom_components.weerplaza.coordinator.aiohttp.ClientSession")
 async def test_coordinator_total_failure(mock_session_cls, hass: HomeAssistant, mock_entry):
     """Verify coordinator throws an UpdateFailed exception if no old records exist during an error."""
     coord = WeerplazaCoordinator(hass, mock_entry)
@@ -84,7 +84,7 @@ async def test_coordinator_total_failure(mock_session_cls, hass: HomeAssistant, 
 
     mock_session_cls.side_effect = Exception("Connection Failed")
 
-    with patch("custom_components.ha_weerplaza.coordinator.asyncio.sleep"), pytest.raises(UpdateFailed):
+    with patch("custom_components.weerplaza.coordinator.asyncio.sleep"), pytest.raises(UpdateFailed):
         await coord._async_update_data()
 
 
