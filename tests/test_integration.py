@@ -17,6 +17,7 @@ MOCK_HTML = """
 </html>
 """
 
+
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses."""
@@ -33,7 +34,7 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
         entry_id="test123",
         state=ConfigEntryState.LOADED,
     )
-    
+
     # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
