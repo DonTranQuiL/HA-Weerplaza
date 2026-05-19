@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntryState
 from custom_components.weerplaza.const import DOMAIN
 from custom_components.weerplaza import async_setup_entry
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
@@ -16,12 +17,11 @@ MOCK_HTML = """
 </html>
 """
 
-
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses."""
 
-    # Use the official MockConfigEntry instead of a custom FakeEntry
+    # Explicitly set the state to LOADED so Home Assistant allows platform forwarding
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="Weerplaza Test",
@@ -31,8 +31,9 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
         },
         options={"scan_interval": 1800},
         entry_id="test123",
+        state=ConfigEntryState.LOADED,
     )
-
+    
     # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
