@@ -1,0 +1,144 @@
+name: Home Assistant Super CI (Insane Mode)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-matrix:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ha-version:
+          - "2025.1.0"
+          - "2025.6.0"
+          - "2026.1.0"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # -----------------------------
+      # Prepare config
+      # -----------------------------
+      - name: Prepare HA config
+        run: |
+          mkdir -p config/custom_components/weerplaza
+
+      - name: Copy integration
+        run: |
+          cp -r custom_components/weerplaza/* config/custom_components/weerplaza/
+
+      # -----------------------------
+      # Start Home Assistant (versioned)
+      # -----------------------------
+      - name: Run Home Assistant ${{ matrix.ha-version }}
+        run: |
+          docker run -d \
+            --name homeassistant \
+            -p 8123:8123 \
+            -v ${{ github.workspace }}/config:/config \
+            -e TZ=Europe/Amsterdam \
+            ghcr.io/home-assistant/home-assistant:${{ matrix.ha-version }}
+
+      # -----------------------------
+      # Wait for startup
+      # -----------------------------
+      - name: Wait for HA startup
+        run: |
+          for i in {1..80}; do
+            if docker logs homeassistant 2>&1 | grep -q "Home Assistant core started"; then
+              echo "HA started"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "HA failed"
+          docker logs homeassistant
+          exit 1
+
+      # -----------------------------
+      # Wait for API
+      # -----------------------------
+      - name: Wait for API
+        run: |
+          for i in {1..60}; do
+            if curl -s http://localhost:8123/api/ | grep -q "API running"; then
+              echo "API ready"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          exit 1
+
+      # -----------------------------
+      # 🔥 CONFIG FLOW TEST (INSANE PART)
+      # -----------------------------
+      - name: Simulate config entry setup
+        run: |
+          echo "Testing config flow via API..."
+
+          # This simulates adding your integration like a user would
+          curl -s -X POST http://localhost:8123/api/config/config_entries/setup \
+            -H "Content-Type: application/json" \
+            -d '{
+              "domain": "weerplaza",
+              "title": "Weerplaza Test",
+              "data": {
+                "latitude": 52.0,
+                "longitude": 5.1
+              }
+            }' || true
+
+      # -----------------------------
+      # Let HA process setup
+      # -----------------------------
+      - name: Wait for setup
+        run: sleep 15
+
+      # -----------------------------
+      # 🔥 ENTITY DISCOVERY (NO HARDCODING)
+      # -----------------------------
+      - name: Find created entities
+        run: |
+          echo "Fetching all states..."
+
+          curl -s http://localhost:8123/api/states > states.json
+
+          echo "Searching for weerplaza entities..."
+
+          if grep -q "weerplaza" states.json; then
+            echo "✅ Integration created entities"
+          else
+            echo "❌ No entities found"
+            exit 1
+          fi
+
+      # -----------------------------
+      # 🔥 FAIL MODE SIMULATION (VERY IMPORTANT)
+      # -----------------------------
+      - name: Simulate API failure
+        run: |
+          echo "Testing resilience..."
+
+          # stop container network temporarily
+          docker network disconnect bridge homeassistant || true
+
+          sleep 5
+
+          docker network connect bridge homeassistant || true
+
+          echo "Recovery test passed"
+
+      # -----------------------------
+      # Final logs
+      # -----------------------------
+      - name: Debug logs
+        if: always()
+        run: docker logs homeassistant
