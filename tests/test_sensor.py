@@ -1,7 +1,11 @@
 import pytest
 from unittest.mock import MagicMock
 from homeassistant.const import EntityCategory
-from custom_components.weerplaza.sensor import WeerplazaMasterSensor, WeerplazaDiagnosticSensor
+from custom_components.weerplaza.sensor import (
+    WeerplazaMasterSensor,
+    WeerplazaDiagnosticSensor,
+)
+
 
 @pytest.fixture
 def mock_coordinator():
@@ -10,9 +14,10 @@ def mock_coordinator():
     coord.data = {
         "current_temperature": 16.5,
         "laatste_scrape_tijd": "19-05-2026 13:00:00",
-        "rain": "Droog"
+        "rain": "Droog",
     }
     return coord
+
 
 def test_master_weather_sensor(mock_coordinator):
     """Verify core attributes map completely to entities."""
@@ -23,11 +28,16 @@ def test_master_weather_sensor(mock_coordinator):
     assert sensor.extra_state_attributes["rain"] == "Droog"
     assert sensor.unique_id == "home_master_weather"
 
+
 def test_diagnostic_sensors(mock_coordinator):
     """Verify tracking attributes map data points cleanly onto structural categories."""
     dev_info = MagicMock()
-    status_sensor = WeerplazaDiagnosticSensor(mock_coordinator, "Home", "home", dev_info, "Status")
-    update_sensor = WeerplazaDiagnosticSensor(mock_coordinator, "Home", "home", dev_info, "Laatste Update")
+    status_sensor = WeerplazaDiagnosticSensor(
+        mock_coordinator, "Home", "home", dev_info, "Status"
+    )
+    update_sensor = WeerplazaDiagnosticSensor(
+        mock_coordinator, "Home", "home", dev_info, "Laatste Update"
+    )
 
     assert status_sensor.native_value == "OK"
     assert update_sensor.native_value == "19-05-2026 13:00:00"

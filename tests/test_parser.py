@@ -1,4 +1,3 @@
-import pytest
 from custom_components.weerplaza.parser import WeerplazaParser
 
 FULL_SAMPLE_HTML = """
@@ -44,6 +43,7 @@ FULL_SAMPLE_HTML = """
 </html>
 """
 
+
 def test_parser_complete_extraction():
     """Verify parsing framework handles all visual markers and converts types seamlessly."""
     parser = WeerplazaParser(FULL_SAMPLE_HTML)
@@ -53,7 +53,7 @@ def test_parser_complete_extraction():
     assert data["flash_detection"] == "Onweer gedetecteerd binnen 15km"
     assert data["flash_range"] == 15
     assert data["alerts"] == "Met waarschuwingen"
-    
+
     assert data["astro"]["sun"]["rise"] == "05:45"
     assert data["astro"]["sun"]["set"] == "21:30"
     assert data["moon_phases"][0]["phase"] == "Volle maan"

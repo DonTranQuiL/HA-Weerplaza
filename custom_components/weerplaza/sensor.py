@@ -8,6 +8,7 @@ from .const import DOMAIN, CONF_INSTANCE_NAME, CONF_LOCATION_PATH
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
     instance_name = entry.data[CONF_INSTANCE_NAME]
@@ -24,11 +25,16 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     entities = [
         WeerplazaMasterSensor(coordinator, instance_name, instance_slug, device_info),
-        WeerplazaDiagnosticSensor(coordinator, instance_name, instance_slug, device_info, "Status"),
-        WeerplazaDiagnosticSensor(coordinator, instance_name, instance_slug, device_info, "Laatste Update")
+        WeerplazaDiagnosticSensor(
+            coordinator, instance_name, instance_slug, device_info, "Status"
+        ),
+        WeerplazaDiagnosticSensor(
+            coordinator, instance_name, instance_slug, device_info, "Laatste Update"
+        ),
     ]
 
     async_add_entities(entities)
+
 
 class WeerplazaMasterSensor(CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
@@ -61,8 +67,9 @@ class WeerplazaMasterSensor(CoordinatorEntity, SensorEntity):
             "rain": data.get("rain"),
             "alerts": data.get("alerts"),
             "astro": data.get("astro", {}),
-            "moon_phases": data.get("moon_phases", [])
+            "moon_phases": data.get("moon_phases", []),
         }
+
 
 class WeerplazaDiagnosticSensor(CoordinatorEntity, SensorEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -86,5 +93,5 @@ class WeerplazaDiagnosticSensor(CoordinatorEntity, SensorEntity):
         if self.sensor_type == "Laatste Update":
             data = self.coordinator.data or {}
             if "laatste_scrape_tijd" not in data and data:
-                 return "Uit Cache (Wacht op timer)"
+                return "Uit Cache (Wacht op timer)"
             return data.get("laatste_scrape_tijd", "Onbekend")

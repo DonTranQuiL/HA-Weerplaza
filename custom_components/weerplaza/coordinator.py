@@ -5,28 +5,29 @@ from datetime import datetime, timedelta
 import aiohttp
 import asyncio
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .const import DOMAIN, BASE_URL, DEBUG_FILE_NAME
+from .const import BASE_URL, DEBUG_FILE_NAME
 from .parser import WeerplazaParser
 
 _LOGGER = logging.getLogger(__name__)
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15"
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15",
 ]
+
 
 class WeerplazaCoordinator(DataUpdateCoordinator):
     def __init__(self, hass, config_entry, cache=None, initial_data=None):
         self.config_entry = config_entry
         self.location_path = config_entry.data["location_path"]
         self.cache = cache
-        
+
         # Prime the coordinator with initial data immediately
         self.data = initial_data
         self._last_data = initial_data
 
         scan_interval = config_entry.options.get("scan_interval", 300)
-        
+
         super().__init__(
             hass,
             _LOGGER,
@@ -62,21 +63,25 @@ class WeerplazaCoordinator(DataUpdateCoordinator):
                         raise UpdateFailed(f"Server returned {response.status}")
 
                     html_content = await response.text()
-                    
+
                     # NIEUW: Opslaan op de achtergrond!
-                    await self.hass.async_add_executor_job(self._save_debug_output, html_content)
+                    await self.hass.async_add_executor_job(
+                        self._save_debug_output, html_content
+                    )
 
                     parser = WeerplazaParser(html_content)
                     new_data = parser.extract_data()
-                    
+
                     # Add timestamp
-                    new_data["laatste_scrape_tijd"] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                    
+                    new_data["laatste_scrape_tijd"] = datetime.now().strftime(
+                        "%d-%m-%Y %H:%M:%S"
+                    )
+
                     # Store locally and save to disk
                     self._last_data = new_data
                     if self.cache:
                         await self.cache.save(new_data)
-                    
+
                     return new_data
 
         except Exception as err:

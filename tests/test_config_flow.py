@@ -3,7 +3,13 @@ from unittest.mock import patch
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.weerplaza.const import DOMAIN, CONF_INSTANCE_NAME, CONF_LOCATION_PATH, CONF_SCAN_INTERVAL
+from custom_components.weerplaza.const import (
+    DOMAIN,
+    CONF_INSTANCE_NAME,
+    CONF_LOCATION_PATH,
+    CONF_SCAN_INTERVAL,
+)
+
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
