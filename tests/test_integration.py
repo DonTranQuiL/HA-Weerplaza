@@ -1,20 +1,27 @@
 import pytest
+from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntryState
-from custom_components.weerplaza import async_setup_entry, DOMAIN
-from homeassistant.exceptions import ConfigEntryNotReady
-import aiohttp
+from custom_components.weerplaza.const import DOMAIN
+from custom_components.weerplaza import async_setup_entry
+from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 
+# Sample HTML mock (simplified)
+MOCK_HTML = """
+<html>
+  <body>
+    <div id="temperature">20°C</div>
+    <div id="humidity">50%</div>
+  </body>
+</html>
+"""
 
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
-    """
-    Hybrid integration test for Weerplaza:
-    - Tries real scrape if network is available
-    - Falls back to mocked scrape for CI
-    """
+    """Test Weerplaza integration using mocked HTTP responses."""
 
     class FakeEntry:
+        """Simulate user config entry."""
         entry_id = "test123"
         domain = DOMAIN
         title = "Weerplaza Test"
@@ -22,9 +29,7 @@ async def test_weerplaza_integration(hass: HomeAssistant):
             "name": "Weerplaza Test",
             "location_path": "nederland/utrecht/19344/",
         }
-        options = {
-            "scan_interval": 1800,
-        }
+        options = {"scan_interval": 1800}
         state = ConfigEntryState.LOADED
 
         async def add_update_listener(self, *args, **kwargs):
@@ -32,29 +37,30 @@ async def test_weerplaza_integration(hass: HomeAssistant):
 
     entry = FakeEntry()
 
-    # Mock HA internals that are not tested here
-    hass.config_entries.async_forward_entry_setups = lambda *args, **kwargs: None
-    hass.config_entries.async_unload_platforms = lambda *args, **kwargs: True
+    # Patch aiohttp session.get to return MOCK_HTML
+    async def fake_get(*args, **kwargs):
+        class FakeResponse:
+            status = 200
+            async def text(self):
+                return MOCK_HTML
+            async def __aenter__(self):
+                return self
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                return False
+        return FakeResponse()
 
-    # Check if the site is reachable
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://www.weerplaza.nl/{entry.data['location_path']}"
-            ) as resp:
-                if resp.status != 200:
-                    raise RuntimeError("Site returned non-200")
-    except Exception:
-        # If unreachable, skip and mock aiohttp in CI
-        pytest.skip("Weerplaza.nl not reachable, using CI-safe mock")
+    # Patch ClientSession to use fake_get
+    with patch("aiohttp.ClientSession") as mock_session:
+        mock_session.return_value.__aenter__.return_value.get = fake_get
 
-    # Setup entry
-    try:
-        result = await async_setup_entry(hass, entry)
-    except ConfigEntryNotReady as e:
-        pytest.skip(f"Skipping real scrape test, site/network unavailable: {e}")
+        # Patch cache to avoid file I/O
+        with patch.object(WeerplazaCoordinator, "cache", new_callable=AsyncMock):
+            # Run the setup
+            result = await async_setup_entry(hass, entry)
 
-    # Assertions
     assert result is True
-    assert DOMAIN in hass.data
-    assert entry.entry_id in hass.data[DOMAIN]
+
+    # Check coordinator data
+    coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
+    assert coordinator.data is not None
+    assert coordinator.data.get("laatste_scrape_tijd") is not None
