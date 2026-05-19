@@ -47,7 +47,7 @@ async def test_coordinator_successful_scrape(mock_session_cls, hass: HomeAssista
     mock_session.get.return_value.__aenter__.return_value = mock_resp
     mock_session_cls.return_value.__aenter__.return_value = mock_session
 
-    with patch("builtins.open", mock_open()), patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
+    ("builtins.open", mock_open()), patch("custom_components.weerplaza.coordinator.asyncio.sleep"):
         result = await coord._async_update_data()
 
     assert result["current_temperature"] == 18.0
