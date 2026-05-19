@@ -2,10 +2,13 @@ import os
 import pytest
 from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
-from custom_components.weerplaza.const import DOMAIN
+from custom_components.weerplaza.const import (
+    DOMAIN,
+    CONF_INSTANCE_NAME,
+    CONF_LOCATION_PATH,
+)
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-
 
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
@@ -16,17 +19,18 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     with open(html_path, "r", encoding="utf-8") as f:
         real_html = f.read()
 
+    # Construct the entry using the exact configuration constant keys
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="Weerplaza Test",
         data={
-            "name": "Weerplaza Test",
-            "location_path": "nederland/utrecht/19344/",
+            CONF_INSTANCE_NAME: "Weerplaza Test",
+            CONF_LOCATION_PATH: "nederland/utrecht/19344/",
         },
         options={"scan_interval": 1800},
         entry_id="test123",
     )
-
+    
     # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
@@ -67,7 +71,7 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     # Check coordinator data is set
     coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
     assert coordinator.data is not None
-
+    
     # Verify the parser successfully handled the real data structures
     assert "current_temperature" in coordinator.data
     assert "laatste_scrape_tijd" in coordinator.data
@@ -75,29 +79,24 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     # ---------------------------------------------------------
     # Verify the Home Assistant State Machine
     # ---------------------------------------------------------
-
+    
     # 1. Master Weather Sensor
-    # The name is "weerplaza Weerplaza Test current weather", which HA slugifies to:
     master_entity_id = "sensor.weerplaza_weerplaza_test_current_weather"
     master_state = hass.states.get(master_entity_id)
-
+    
     assert master_state is not None, f"Entity {master_entity_id} was not created!"
-
+    
     # HA always stores the main state as a string, even if you passed a float!
-    assert master_state.state == "16.0"
-
+    assert master_state.state == "16.0" 
+    
     # Extra state attributes retain their original Python types
     assert master_state.attributes.get("rain") == "Lichte regen"
     assert master_state.attributes.get("alerts") == "Met waarschuwingen"
-    assert (
-        master_state.attributes.get("flash_detection")
-        == "Onweer gedetecteerd binnen 15km"
-    )
-
+    assert master_state.attributes.get("flash_detection") == "Onweer gedetecteerd binnen 15km"
+    
     # 2. Diagnostic Status Sensor
-    # The name is "Weerplaza Test Status", which HA slugifies to:
     status_entity_id = "sensor.weerplaza_test_status"
     status_state = hass.states.get(status_entity_id)
-
+    
     assert status_state is not None, f"Entity {status_entity_id} was not created!"
     assert status_state.state == "OK"  # Proves the error counter is 0
