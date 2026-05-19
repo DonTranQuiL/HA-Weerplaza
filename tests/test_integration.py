@@ -4,16 +4,16 @@ import requests
 HA = "http://localhost:8123"
 
 
-def test_home_assistant_is_up():
+def test_home_assistant_is_running():
     r = requests.get(f"{HA}/")
     assert r.status_code == 200
 
 
-def test_weeerplaza_integration_smoke():
+def test_weeerplaza_smoke():
     """
-    Stable CI test:
-    - verifies HA started
-    - verifies integration did not crash startup
+    Stable integration smoke test:
+    - ensures HA started
+    - ensures integration did not crash startup
     """
 
     time.sleep(10)
