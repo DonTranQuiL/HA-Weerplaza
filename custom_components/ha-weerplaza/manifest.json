@@ -1,5 +1,5 @@
 {
-  "domain": "ha-weerplaza",
+  "domain": "weerplaza",
   "name": "Weerplaza Weather",
   "after_dependencies": [],
   "codeowners": [
