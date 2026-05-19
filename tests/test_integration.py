@@ -18,7 +18,7 @@ MOCK_HTML = """
 
 
 @pytest.mark.asyncio
-async def test_weerplaza_integration(hass: HomeAssistant):
+async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses."""
 
     class FakeEntry:
