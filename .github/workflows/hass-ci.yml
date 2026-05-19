@@ -76,9 +76,12 @@ jobs:
       # -------------------------
       # Run tests
       # -------------------------
+      - name: Install test dependencies
+        run: |
+          pip install pytest requests pytest-homeassistant-custom-component
+
       - name: Run integration tests
         run: |
-          pip install pytest requests
           pytest -v tests/test_integration.py
 
       # -------------------------
