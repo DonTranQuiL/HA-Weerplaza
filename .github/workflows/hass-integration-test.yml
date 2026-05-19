@@ -1,0 +1,82 @@
+name: Home Assistant Integration Test (Real Runtime)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  hass-integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # -----------------------------
+      # Prepare Home Assistant config
+      # -----------------------------
+      - name: Create HA config directory
+        run: |
+          mkdir -p config/custom_components/weerplaza
+
+      - name: Copy integration into HA
+        run: |
+          cp -r custom_components/weerplaza/* config/custom_components/weerplaza/
+
+      # -----------------------------
+      # Start Home Assistant
+      # -----------------------------
+      - name: Run Home Assistant container
+        run: |
+          docker run -d \
+            --name homeassistant \
+            -v ${{ github.workspace }}/config:/config \
+            -e TZ=Europe/Amsterdam \
+            ghcr.io/home-assistant/home-assistant:stable
+
+      # -----------------------------
+      # Wait for startup
+      # -----------------------------
+      - name: Wait for Home Assistant startup
+        run: |
+          echo "Waiting for Home Assistant to start..."
+
+          for i in {1..60}; do
+            if docker logs homeassistant 2>&1 | grep -q "Home Assistant core started"; then
+              echo "Home Assistant started successfully"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Home Assistant failed to start"
+          docker logs homeassistant
+          exit 1
+
+      # -----------------------------
+      # Check integration loaded
+      # -----------------------------
+      - name: Verify integration loaded
+        run: |
+          docker logs homeassistant > logs.txt
+
+          echo "Searching for integration errors..."
+
+          # Fail if your integration caused errors
+          if grep -i "weerplaza" logs.txt | grep -i "error"; then
+            echo "❌ Integration error detected"
+            grep -i "weerplaza" logs.txt
+            exit 1
+          fi
+
+          echo "✅ No integration errors found"
+
+      # -----------------------------
+      # Show logs for debugging
+      # -----------------------------
+      - name: Print Home Assistant logs
+        if: always()
+        run: docker logs homeassistant
