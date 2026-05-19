@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
       - name: Update manifest version
         run: |
@@ -24,16 +26,23 @@ jobs:
 
           tmp=$(mktemp)
           jq --arg version "$VERSION" '.version = $version' \
-            custom_components/ha-weerplaza/manifest.json > "$tmp"
+            custom_components/nova_conversation/manifest.json > "$tmp"
 
-          mv "$tmp" custom_components/ha-weerplaza/manifest.json
+          mv "$tmp" custom_components/nova_conversation/manifest.json
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "Bump manifest version to ${{ github.ref_name }} [skip ci]"
+          file_pattern: "custom_components/nova_conversation/manifest.json"
+          branch: main 
 
       - name: Create ZIP
         run: |
-          cd custom_components/ha-weerplaza
-          zip -r ha-weerplaza.zip ./
+          cd custom_components/nova_conversation
+          zip -r nova_conversation.zip ./
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          files: custom_components/ha-weerplaza/ha-weerplaza.zip
+          files: custom_components/nova_conversation/nova_conversation.zip
