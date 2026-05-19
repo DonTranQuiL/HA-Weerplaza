@@ -1,9 +1,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntryState
 from custom_components.weerplaza.const import DOMAIN
-from custom_components.weerplaza import async_setup_entry
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -17,12 +15,11 @@ MOCK_HTML = """
 </html>
 """
 
-
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrations):
     """Test Weerplaza integration using mocked HTTP responses."""
 
-    # Explicitly set the state to LOADED so Home Assistant allows platform forwarding
+    # Let the entry initialize naturally (do NOT force a state manually)
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="Weerplaza Test",
@@ -32,9 +29,8 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
         },
         options={"scan_interval": 1800},
         entry_id="test123",
-        state=ConfigEntryState.LOADED,
     )
-
+    
     # Register the mock entry with the Home Assistant instance
     entry.add_to_hass(hass)
 
@@ -68,11 +64,10 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     ):
         mock_session.return_value.__aenter__.return_value.get = fake_get
 
-        # Setup entry
-        result = await async_setup_entry(hass, entry)
+        # The official, deadlock-free way to trigger integration setups in HA tests
+        await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
 
-    assert result is True
-
-    # Check coordinator data is set
+    # Verify coordinator data is successfully populated and registered
     coordinator: WeerplazaCoordinator = hass.data[DOMAIN][entry.entry_id]
     assert coordinator.data is not None
