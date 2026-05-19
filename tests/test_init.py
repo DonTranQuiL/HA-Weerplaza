@@ -78,7 +78,7 @@ async def test_unload_and_reload(hass: HomeAssistant, mock_dependencies):
         await async_reload_entry(hass, entry)
         mock_reload.assert_called_once_with(entry.entry_id)
 
-    with patch("homeassistant.config_entries.ConfigEntries.async_unload_platforms", return_value=True) as mock_unload:
+    with patch("homeassistant.config_entries.ConfigEntries.async_unload_platforms", return_value=True):
         assert await async_unload_entry(hass, entry) is True
         assert entry.entry_id not in hass.data[DOMAIN]
 
