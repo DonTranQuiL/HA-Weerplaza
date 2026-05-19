@@ -22,7 +22,7 @@ async def test_weerplaza_integration_loads(hass: HomeAssistant):
         title = "Weerplaza Test"
         data = {
             "name": "Weerplaza Test",
-            "location_path": "netherlands/utrecht",   # <-- FIX
+            "location_path": "netherlands/utrecht",  # <-- FIX
         }
         state = ConfigEntryState.LOADED
 
