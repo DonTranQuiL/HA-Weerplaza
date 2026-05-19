@@ -16,7 +16,6 @@ MOCK_HTML = """
 </html>
 """
 
-
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
     """Test Weerplaza integration using mocked HTTP responses."""
@@ -36,7 +35,7 @@ async def test_weerplaza_integration(hass: HomeAssistant):
     entry = FakeEntry()
 
     # Mock aiohttp ClientSession.get
-    async def fake_get(*args, **kwargs):
+    def fake_get(*args, **kwargs):
         class FakeResponse:
             status = 200
 
