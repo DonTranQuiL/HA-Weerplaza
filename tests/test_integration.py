@@ -16,6 +16,7 @@ MOCK_HTML = """
 </html>
 """
 
+
 @pytest.mark.asyncio
 async def test_weerplaza_integration(hass: HomeAssistant):
     """Test Weerplaza integration using mocked HTTP responses."""
