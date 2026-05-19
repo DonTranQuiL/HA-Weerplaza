@@ -15,16 +15,18 @@ async def test_weerplaza_integration_loads(hass: HomeAssistant):
     - ensures coordinator is created
     """
 
-    # --- REALISTIC config entry (NO mocking ConfigEntry class) ---
+    # --- REALISTIC config entry simulating user input ---
     class FakeEntry:
         entry_id = "test123"
         domain = DOMAIN
         title = "Weerplaza Test"
         data = {
             "name": "Weerplaza Test",
-            "location_path": "netherlands/utrecht",  # <-- required for scraping
+            "location_path": "nederland/utrecht/19344/",  # <-- copy from Weerplaza URL
         }
-        options = {}  # <-- fix: scan_interval or other options can be added here
+        options = {
+            "scan_interval": 1800,  # <-- user-recommended interval
+        }
         state = ConfigEntryState.LOADED
 
         async def add_update_listener(self, *args, **kwargs):
@@ -45,3 +47,7 @@ async def test_weerplaza_integration_loads(hass: HomeAssistant):
     # coordinator must exist
     assert DOMAIN in hass.data
     assert entry.entry_id in hass.data[DOMAIN]
+
+    # Verify scan_interval is correctly read
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert coordinator.scan_interval == 1800
