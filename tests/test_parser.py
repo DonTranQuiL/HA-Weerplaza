@@ -1,5 +1,5 @@
 import pytest
-from custom_components.ha_weerplaza.parser import WeerplazaParser
+from custom_components.weerplaza.parser import WeerplazaParser
 
 FULL_SAMPLE_HTML = """
 <html>
