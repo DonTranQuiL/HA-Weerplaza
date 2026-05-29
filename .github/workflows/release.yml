@@ -52,15 +52,19 @@ jobs:
           file_pattern: "custom_components/**/manifest.json"
           branch: main
 
-      - name: Create ZIP
+      - name: Create HACS ZIP
         run: |
           INTEGRATION=${{ steps.integration.outputs.integration }}
 
-          cd custom_components/$INTEGRATION
+          mkdir -p release/custom_components
 
-          zip -r "$INTEGRATION.zip" ./*
+          cp -r custom_components/$INTEGRATION release/custom_components/
+
+          cd release
+
+          zip -r "$INTEGRATION.zip" custom_components
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v3
         with:
-          files: custom_components/${{ steps.integration.outputs.integration }}/${{ steps.integration.outputs.integration }}.zip
+          files: release/${{ steps.integration.outputs.integration }}.zip
