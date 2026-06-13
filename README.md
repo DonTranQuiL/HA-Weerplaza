@@ -169,6 +169,11 @@ cards:
 ```
 <img width="363" height="679" alt="{F1C45BE3-054E-43FA-8425-D72B2C05F887}" src="https://github.com/user-attachments/assets/173ea33e-023c-4344-8ba5-5a15f0fe6788" />
 
+## 🎨 NEW JS WEATHERCARD WITH AMBIENT ANIMATIONS BASED ON STATUS
+
+<img width="434" height="675" alt="newcardweather" src="https://github.com/user-attachments/assets/09d929df-fcfa-4fb4-888d-24beb9505eaf" />
+
+
 
 [hacs]: https://hacs.xyz
 [hacs_badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
