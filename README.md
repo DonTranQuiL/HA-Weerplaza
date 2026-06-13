@@ -94,6 +94,27 @@ This integration was created with significant collaboration, testing, and debugg
    * *Example:* For `https://www.weerplaza.nl/nederland/utrecht/19344/`, use `nederland/utrecht/19344/`.
 5. **Scan Interval**: Set how often to check for updates (1800 seconds recommended).
 
+### 🎨 JS card installation
+First Download the weerplaza-command-center.js and insert it in the WWW folder of homeassistant.
+
+1. Open **settings** -> **dashboards**.
+2. Click the 3-dots menu (top right) -> **resources**.
+3. Click blue button ADD resource.
+4. Click paste this :/local/weerplaza-command-center.js
+5. go to your dashboard of choice, and add a card.
+6. Select manual and paste this code
+```yaml
+type: grid
+cards:
+  - type: heading
+    heading: New section
+  - type: custom:weerplaza-command-center
+    entity: sensor.eygelshoven_weerplaza_HEREYOURLOCATIONNAME_current_weather
+```
+At "HEREYOURLOCATIONNAME" is the location u setup at the beginning e.g Maastricht
+
+
+
 ## 📊 Sensors & Attributes
 
 ### Master Sensor
