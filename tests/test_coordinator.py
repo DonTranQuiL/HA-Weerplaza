@@ -1,8 +1,8 @@
+from unittest.mock import AsyncMock, MagicMock, mock_open, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock, mock_open
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
-
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.weerplaza.const import DOMAIN

@@ -1,6 +1,7 @@
-from bs4 import BeautifulSoup
-import re
 import logging
+import re
+
+from bs4 import BeautifulSoup
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class WeerplazaParser:
             astro_block = self.soup.find("div", class_=re.compile("forecast-astro"))
             if astro_block:
                 for label, key in [("Zon op", "rise"), ("Zon onder", "set")]:
-                    tag = astro_block.find("b", string=re.compile(label, re.I))
+                    tag = astro_block.find("b", string=re.compile(label, re.IGNORECASE))
                     if tag and tag.parent:
                         full_text = tag.parent.get_text(separator=" ", strip=True)
                         match = re.search(r"(\d{2}:\d{2})", full_text)
@@ -78,7 +79,7 @@ class WeerplazaParser:
                     "Nieuwe maan",
                 ]
                 for p_name in phases:
-                    p_tag = astro_block.find(string=re.compile(p_name, re.I))
+                    p_tag = astro_block.find(string=re.compile(p_name, re.IGNORECASE))
                     if p_tag:
                         container = (
                             p_tag.find_parent("div", class_="col") or p_tag.parent

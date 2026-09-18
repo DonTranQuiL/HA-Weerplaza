@@ -1,9 +1,11 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from homeassistant.const import EntityCategory
+
 from custom_components.weerplaza.sensor import (
-    WeerplazaMasterSensor,
     WeerplazaDiagnosticSensor,
+    WeerplazaMasterSensor,
 )
 
 

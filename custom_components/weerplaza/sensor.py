@@ -1,10 +1,12 @@
 import logging
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.const import UnitOfTemperature, EntityCategory
+
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.const import EntityCategory, UnitOfTemperature
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
-from .const import DOMAIN, CONF_INSTANCE_NAME, CONF_LOCATION_PATH
+
+from .const import CONF_INSTANCE_NAME, CONF_LOCATION_PATH, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

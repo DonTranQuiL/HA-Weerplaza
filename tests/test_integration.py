@@ -1,14 +1,16 @@
 import os
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from custom_components.weerplaza.const import (
-    DOMAIN,
     CONF_INSTANCE_NAME,
     CONF_LOCATION_PATH,
+    DOMAIN,
 )
 from custom_components.weerplaza.coordinator import WeerplazaCoordinator
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 @pytest.mark.asyncio

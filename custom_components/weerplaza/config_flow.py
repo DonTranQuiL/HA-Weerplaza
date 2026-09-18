@@ -1,13 +1,14 @@
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
+
 from .const import (
-    DOMAIN,
-    CONF_LOCATION_PATH,
     CONF_INSTANCE_NAME,
+    CONF_LOCATION_PATH,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
 )
 
 

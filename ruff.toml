@@ -17,6 +17,7 @@ ignore = [
     "TRY401",  # redundant exception in logging.exception
     "SIM103",  # return negated condition (style)
     "SIM102",  # nested if (style)
+    "SIM117",  # nested with (aiohttp session+response pattern)
     "ASYNC230", # blocking open in async (debug path; non-critical)
     "PERF102",
     "S112",
