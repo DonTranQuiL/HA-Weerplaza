@@ -53,6 +53,9 @@
   <a href="https://community.home-assistant.io/">
     <img src="https://img.shields.io/badge/community-forum-007ec6?style=for-the-badge" alt="Community">
   </a>
+  <a href="https://discord.gg/qaHPTTKHae">
+    <img src="https://img.shields.io/badge/Discord-join%20community-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
+  </a>
 </p>
 
 This custom component for Home Assistant allows you to monitor weather data for any location from the Dutch weather site [Weerplaza.nl](https://www.weerplaza.nl/). It works by scraping the data directly from the location's page, providing detailed weather information without requiring an official API.
