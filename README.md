@@ -11,7 +11,7 @@
     <img src="https://img.shields.io/github/v/release/DonTranQuiL/HA-Weerplaza?style=for-the-badge&color=007ec6" alt="Latest Release">
   </a>
   <a href="https://github.com/DonTranQuiL/HA-Weerplaza/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/DonTranQuiL/HA-Weerplaza?style=for-the-badge&color=007ec6" alt="License">
+    <img src="https://img.shields.io/github/license/DonTranQuiL/HA-Weerplaza?style=for-the-badge&color=007ec6" alt="License: MIT">
   </a>
   <a href="https://github.com/DonTranQuiL/HA-Weerplaza/actions/workflows/hass-ci.yml">
     <img src="https://github.com/DonTranQuiL/HA-Weerplaza/actions/workflows/hass-ci.yml/badge.svg" alt="Home Assistant CI" style="height:28px;">
@@ -198,6 +198,10 @@ cards:
 <img width="434" height="675" alt="newcardweather" src="https://github.com/user-attachments/assets/09d929df-fcfa-4fb4-888d-24beb9505eaf" />
 
 
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 [hacs]: https://hacs.xyz
 [hacs_badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
