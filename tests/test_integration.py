@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.weerplaza.const import (
@@ -85,6 +86,14 @@ async def test_weerplaza_integration(hass: HomeAssistant, enable_custom_integrat
     )
 
     # 1. Master Weather Sensor
-    master_entity_id = "sensor.weerplaza_weerplaza_test_current_weather"
+    # Look the entity up by unique_id: Home Assistant 2026.10+ prefixes newly
+    # generated entity_ids with the device name, so a hardcoded entity_id
+    # differs between HA versions (existing installs keep theirs via the registry).
+    ent_reg = er.async_get(hass)
+    master_entity_id = ent_reg.async_get_entity_id(
+        "sensor", DOMAIN, "weerplaza_test_master_weather"
+    )
+    assert master_entity_id is not None
     master_state = hass.states.get(master_entity_id)
+    assert master_state is not None
     assert master_state.state == "16.0"
