@@ -12,7 +12,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Malosaaa/ha-weerplaza/issues",
   "requirements": [
-    "beautifulsoup4==4.13.3"
+    "beautifulsoup4>=4.13.3"
   ],
   "version": "1.0.6"
 }
