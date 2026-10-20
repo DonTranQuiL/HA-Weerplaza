@@ -2,9 +2,6 @@
   "domain": "weerplaza",
   "name": "Weerplaza Weather",
   "after_dependencies": [],
-  "categories": [
-    "weather_alerts.forecasts"
-  ],
   "codeowners": [
     "@Malosaaa"
   ],
